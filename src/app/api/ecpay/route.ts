@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 
 const MERCHANT_ID = process.env.MERCHANTID;
-const HASH_KEY = process.env.HASHKEY;
-const HASH_IV = process.env.HASHIV;
+const HASH_KEY = process.env.HASHKEY?.trim();
+const HASH_IV = process.env.HASHIV?.trim();
 
 interface PaymentData {
   MerchantID: string;
@@ -32,21 +32,10 @@ export async function POST(request: Request) {
     throw new Error('Missing required environment variables');
   }
 
-  const MerchantTradeDate = new Date().toLocaleString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    timeZone: 'UTC',
-  });
-
   const data: PaymentData = {
     MerchantID: MERCHANT_ID,
     MerchantTradeNo: orderNumber,
-    MerchantTradeDate,
+    MerchantTradeDate: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
     PaymentType: 'aio',
     TotalAmount: amount,
     TradeDesc: 'Test Transaction',
@@ -70,11 +59,11 @@ export async function POST(request: Request) {
 }
 
 function generateCheckMacValue(data: Record<keyof PaymentData, string | number>): string {
-  let checkValue = `HashKey=${HASH_KEY}`;
+  let checkValue = `HashKey=${HASH_KEY?.trim()}`;
   Object.keys(data).forEach((key) => {
     checkValue += `&${key}=${data[key as keyof PaymentData]}`;
   });
-  checkValue += `&HashIV=${HASH_IV}`;
+  checkValue += `&HashIV=${HASH_IV?.trim()}`;
 
   checkValue = encodeURIComponent(checkValue).toLowerCase();
   checkValue = checkValue.replace(/%20/g, '+');
