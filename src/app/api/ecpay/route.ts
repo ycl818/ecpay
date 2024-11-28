@@ -32,10 +32,21 @@ export async function POST(request: Request) {
     throw new Error('Missing required environment variables');
   }
 
+  const MerchantTradeDate = new Date().toLocaleString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  });
+
   const data: PaymentData = {
     MerchantID: MERCHANT_ID,
     MerchantTradeNo: orderNumber,
-    MerchantTradeDate: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
+    MerchantTradeDate,
     PaymentType: 'aio',
     TotalAmount: amount,
     TradeDesc: 'Test Transaction',
